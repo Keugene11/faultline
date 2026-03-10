@@ -1,143 +1,186 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { industries } from "@/lib/data/industries";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function Home() {
+  const [activeIndustry, setActiveIndustry] = useState(0);
+  const active = industries[activeIndustry];
   const totalInsights = industries.reduce((sum, i) => sum + i.insights.length, 0);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       {/* Nav */}
-      <header className="sticky top-0 z-50 bg-[#FFFEFD]/90 backdrop-blur-md border-b border-gray-200">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-5">
-          <Link href="/" className="text-lg font-semibold tracking-tight">
-            faultline
-          </Link>
-          <Link
-            href="/explore"
-            className="text-sm text-gray-500 hover:text-[#1A1A1A] transition-colors"
-          >
-            AI Explorer
-          </Link>
+      <nav className="flex items-center justify-between px-6 py-5 max-w-5xl mx-auto">
+        <Link href="/" className="text-base font-semibold">
+          faultline
+        </Link>
+        <div className="flex items-center gap-6 text-sm">
+          <Link href="/" className="text-black">Industries</Link>
+          <Link href="/explore" className="text-black/50 hover:text-black transition-colors">Explorer</Link>
         </div>
-      </header>
+      </nav>
 
       {/* Hero */}
-      <section className="mx-auto max-w-3xl px-6 pt-16 pb-14">
-        <h1 className="text-4xl font-semibold tracking-tight leading-[1.15]">
-          Industries with cracks
+      <section className="max-w-5xl mx-auto px-6 pt-16 pb-20 text-center">
+        <h1 className="text-5xl sm:text-6xl font-semibold tracking-tight leading-[1.08] max-w-2xl mx-auto">
+          Find startup ideas
           <br />
-          worth breaking open.
+          backed by real data.
         </h1>
-        <p className="mt-4 text-gray-500 text-lg leading-relaxed max-w-lg">
-          Real government data on fragmented, low-tech industries where a startup can win.
-          {" "}{industries.length} industries. {totalInsights} fault lines. Every stat cited.
+        <p className="mt-5 text-lg text-black/50 max-w-md mx-auto leading-relaxed">
+          {industries.length} industries. {totalInsights} fault lines. Every statistic from BLS and FRED.
         </p>
       </section>
 
-      {/* Top Insights */}
-      <section className="mx-auto max-w-3xl px-6 pb-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-400 mb-5">
-          Highest-confidence fault lines
-        </p>
-        <div className="space-y-3">
-          {industries
-            .flatMap((ind) =>
-              ind.insights.map((ins) => ({
-                ...ins,
-                industryName: ind.name,
-                industryId: ind.id,
-              }))
-            )
-            .sort((a, b) => b.confidence - a.confidence)
-            .slice(0, 5)
-            .map((insight) => (
-              <Link key={insight.id} href={`/industry/${insight.industryId}`}>
-                <Card className="group border-gray-200 hover:border-[#1A1A1A] transition-all duration-300 cursor-pointer rounded-2xl shadow-none">
-                  <CardContent className="p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">
-                          {insight.industryName}
-                        </p>
-                        <p className="text-[15px] leading-relaxed text-[#1A1A1A]">
-                          {insight.statement}
-                        </p>
-                        <p className="mt-2.5 text-sm font-semibold text-[#1A1A1A]">
-                          {insight.value}
-                        </p>
-                      </div>
-                      <div className="mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <ArrowUpRight className="h-4 w-4 text-gray-400" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+      {/* Interactive Feature Carousel — Cal AI style */}
+      <section className="max-w-5xl mx-auto px-6 pb-24">
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
+          {/* Left: clickable industry cards */}
+          <div className="space-y-3">
+            {industries.map((industry, i) => (
+              <button
+                key={industry.id}
+                onClick={() => setActiveIndustry(i)}
+                className={`w-full text-left p-6 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                  i === activeIndustry
+                    ? "border-black bg-gray-100 scale-[1.02]"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <h3 className="text-base font-semibold">{industry.name}</h3>
+                  <span className="text-sm text-black/40">{industry.insights.length} fault lines</span>
+                </div>
+                <p className="text-sm text-black/50 leading-relaxed">
+                  {industry.startupFit}
+                </p>
+              </button>
+            ))}
+          </div>
+
+          {/* Right: detail panel — like Cal AI's phone mockup area */}
+          <div className="lg:sticky lg:top-24">
+            <div className="rounded-3xl border border-gray-200 bg-white overflow-hidden">
+              {/* Header */}
+              <div className="p-8 pb-6 border-b border-gray-100">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-black/30 mb-3">
+                  {active.name}
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-2xl font-semibold">{active.marketSize}</p>
+                    <p className="text-xs text-black/40 mt-0.5">Market size</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold">{active.techPenetration}</p>
+                    <p className="text-xs text-black/40 mt-0.5">Tech adoption</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold">{active.fragmentation.split(",")[0]}</p>
+                    <p className="text-xs text-black/40 mt-0.5">Businesses</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold">
+                      {active.employmentK > 0 ? `${(active.employmentK / 1000).toFixed(1)}M` : "—"}
+                    </p>
+                    <p className="text-xs text-black/40 mt-0.5">Workers</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top insight preview */}
+              <div className="p-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-black/30 mb-4">
+                  Top fault line
+                </p>
+                <p className="text-xl font-semibold mb-2">
+                  {active.insights[0].value}
+                </p>
+                <p className="text-sm text-black/60 leading-relaxed mb-6">
+                  {active.insights[0].statement}
+                </p>
+                <Link
+                  href={`/industry/${active.id}`}
+                  className="inline-flex items-center gap-2 text-sm font-semibold hover:gap-3 transition-all duration-300"
+                >
+                  See all {active.insights.length} fault lines
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Dot indicators — Cal AI style */}
+            <div className="flex justify-center gap-1.5 mt-5">
+              {industries.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndustry(i)}
+                  className={`h-2 w-2 rounded-full transition-colors duration-300 ${
+                    i === activeIndustry ? "bg-gray-800" : "bg-gray-300"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Full industry list — Hinge section-break style with dark bg */}
+      <section className="bg-black text-white">
+        <div className="max-w-5xl mx-auto px-6 py-20">
+          <h2 className="text-3xl font-semibold tracking-tight mb-3">
+            All industries
+          </h2>
+          <p className="text-white/50 mb-12">
+            Fragmented markets with low tech adoption.
+          </p>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            {industries.map((industry) => (
+              <Link key={industry.id} href={`/industry/${industry.id}`}>
+                <div className="group p-6 rounded-2xl border border-white/10 hover:border-white/30 hover:bg-white/5 transition-all duration-300">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold">{industry.name}</h3>
+                    <ArrowRight className="h-4 w-4 text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-300" />
+                  </div>
+                  <div className="flex items-center gap-5 text-sm text-white/50">
+                    <span>{industry.marketSize}</span>
+                    <span>{industry.fragmentation.split(",")[0]}</span>
+                    <span>{industry.techPenetration} tech</span>
+                  </div>
+                </div>
               </Link>
             ))}
+          </div>
         </div>
       </section>
 
-      {/* Divider */}
-      <div className="mx-auto max-w-3xl px-6">
-        <div className="border-t border-gray-200" />
-      </div>
-
-      {/* Industry List */}
-      <section className="mx-auto max-w-3xl px-6 py-12">
-        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-400 mb-5">
-          Browse industries
+      {/* CTA — like Hinge's "designed to be deleted" */}
+      <section className="max-w-5xl mx-auto px-6 py-24 text-center">
+        <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-4">
+          Every number is real.
+          <br />
+          Every source is cited.
+        </h2>
+        <p className="text-black/50 mb-8 max-w-md mx-auto">
+          Built on Bureau of Labor Statistics and Federal Reserve Economic Data.
         </p>
-        <div className="space-y-3">
-          {industries.map((industry) => (
-            <Link key={industry.id} href={`/industry/${industry.id}`}>
-              <Card className="group border-gray-200 hover:border-[#1A1A1A] transition-all duration-300 cursor-pointer rounded-2xl shadow-none">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-semibold text-[#1A1A1A]">{industry.name}</h3>
-                    <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-[#1A1A1A] group-hover:translate-x-0.5 transition-all duration-300" />
-                  </div>
-
-                  <p className="text-sm text-gray-500 leading-relaxed mb-5">
-                    {industry.startupFit}
-                  </p>
-
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="text-sm font-semibold text-[#1A1A1A]">{industry.marketSize}</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">Market</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#1A1A1A]">
-                        {industry.fragmentation.split(",")[0]}
-                      </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">Businesses</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#1A1A1A]">
-                        {industry.techPenetration}
-                      </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">Tech adoption</p>
-                    </div>
-                    <div className="ml-auto">
-                      <p className="text-sm font-semibold text-[#1A1A1A]">
-                        {industry.insights.length}
-                      </p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">Fault lines</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <Link
+          href="/explore"
+          className="inline-flex items-center gap-2 bg-black text-white px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-black/80 transition-colors"
+        >
+          Try AI Explorer
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 mt-4">
-        <div className="mx-auto max-w-3xl px-6 py-8 text-xs text-gray-400">
-          Data from Bureau of Labor Statistics and Federal Reserve Economic Data. All statistics cited.
+      <footer className="border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-6 py-8 text-xs text-black/30">
+          Data from Bureau of Labor Statistics and Federal Reserve Economic Data.
         </div>
       </footer>
     </div>
