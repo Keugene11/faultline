@@ -4,22 +4,21 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Zap, Send, Bot, User, Loader2 } from "lucide-react";
+import { Sparkles, Send, Bot, User, Loader2 } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-const SUGGESTED_QUERIES = [
+const SUGGESTED = [
   "Which industries are losing the most jobs?",
   "Where are the biggest labor shortages?",
-  "What industries have the worst real wage growth?",
-  "Where is government spending not translating to growth?",
-  "What are the best opportunities in healthcare?",
+  "What industries have the worst wage growth?",
+  "Where is government spending failing?",
+  "Best opportunities in healthcare?",
 ];
 
 export default function ExplorePage() {
@@ -42,19 +41,13 @@ export default function ExplorePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: [...messages, userMsg] }),
       });
-
-      if (!res.ok) throw new Error("Failed to get response");
-
+      if (!res.ok) throw new Error("Failed");
       const data = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: data.content }]);
     } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content:
-            "Sorry, I encountered an error. Make sure the DeepSeek API key is configured in .env.local.",
-        },
+        { role: "assistant", content: "Something went wrong. Check your DeepSeek API key in .env.local." },
       ]);
     } finally {
       setLoading(false);
@@ -63,65 +56,79 @@ export default function ExplorePage() {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 shrink-0">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <Zap className="h-6 w-6 text-red-400" />
-            <span className="text-xl font-bold tracking-tight">Faultline</span>
-          </div>
-          <nav className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-foreground transition-colors">
+      {/* Nav */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-stone-200/60 shrink-0">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-orange-400 shadow-sm">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-xl font-bold tracking-tight text-stone-900">faultline</span>
+          </Link>
+          <nav className="flex items-center gap-1">
+            <Link
+              href="/"
+              className="rounded-full px-4 py-2 text-sm font-medium text-stone-500 hover:bg-stone-50 transition-colors"
+            >
               Industries
             </Link>
-            <Link href="/explore" className="text-foreground">
+            <Link
+              href="/explore"
+              className="rounded-full bg-stone-100 px-4 py-2 text-sm font-medium text-stone-900"
+            >
               AI Explorer
             </Link>
           </nav>
         </div>
       </header>
 
-      {/* Chat Area */}
+      {/* Chat */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="mx-auto max-w-3xl px-6 py-8">
+          <div className="mx-auto max-w-2xl px-6 py-8">
             {messages.length === 0 ? (
-              <div className="text-center py-16">
-                <Bot className="h-12 w-12 text-red-400 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold mb-2">Ask about industry fault lines</h1>
-                <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                  I can analyze industry data from BLS, FRED, and Census Bureau to find
-                  inefficiencies, pain points, and business opportunities.
+              <div className="text-center py-20">
+                <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-rose-500 to-orange-400 mx-auto mb-6 shadow-lg shadow-rose-200/50">
+                  <Bot className="h-8 w-8 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold text-stone-900 mb-2">
+                  Ask about industry fault lines
+                </h1>
+                <p className="text-stone-400 mb-10 max-w-sm mx-auto">
+                  I analyze real BLS, FRED, and Census data to find inefficiencies and opportunities.
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {SUGGESTED_QUERIES.map((q) => (
-                    <Badge
+                  {SUGGESTED.map((q) => (
+                    <button
                       key={q}
-                      variant="outline"
-                      className="cursor-pointer hover:bg-muted transition-colors py-2 px-3"
                       onClick={() => handleSubmit(q)}
+                      className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:border-rose-200 transition-all shadow-sm"
                     >
                       {q}
-                    </Badge>
+                    </button>
                   ))}
                 </div>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 {messages.map((msg, i) => (
                   <div key={i} className="flex gap-3">
                     <div
-                      className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${msg.role === "user" ? "bg-muted" : "bg-red-500/20"}`}
+                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
+                        msg.role === "user"
+                          ? "bg-stone-100"
+                          : "bg-gradient-to-br from-rose-500 to-orange-400 shadow-sm"
+                      }`}
                     >
                       {msg.role === "user" ? (
-                        <User className="h-4 w-4" />
+                        <User className="h-4 w-4 text-stone-500" />
                       ) : (
-                        <Bot className="h-4 w-4 text-red-400" />
+                        <Bot className="h-4 w-4 text-white" />
                       )}
                     </div>
-                    <Card className="flex-1">
+                    <Card className={`flex-1 border-stone-200/60 shadow-sm ${msg.role === "assistant" ? "bg-white" : "bg-stone-50"}`}>
                       <CardContent className="p-4">
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        <p className="text-sm leading-relaxed text-stone-700 whitespace-pre-wrap">
                           {msg.content}
                         </p>
                       </CardContent>
@@ -130,12 +137,12 @@ export default function ExplorePage() {
                 ))}
                 {loading && (
                   <div className="flex gap-3">
-                    <div className="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500/20">
-                      <Bot className="h-4 w-4 text-red-400" />
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-400 shadow-sm">
+                      <Bot className="h-4 w-4 text-white" />
                     </div>
-                    <Card className="flex-1">
+                    <Card className="flex-1 border-stone-200/60 shadow-sm bg-white">
                       <CardContent className="p-4">
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        <Loader2 className="h-4 w-4 animate-spin text-stone-400" />
                       </CardContent>
                     </Card>
                   </div>
@@ -147,8 +154,8 @@ export default function ExplorePage() {
       </div>
 
       {/* Input */}
-      <div className="border-t border-border/50 shrink-0">
-        <div className="mx-auto max-w-3xl px-6 py-4">
+      <div className="border-t border-stone-200/60 bg-white shrink-0">
+        <div className="mx-auto max-w-2xl px-6 py-4">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -159,15 +166,20 @@ export default function ExplorePage() {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about industry inefficiencies, opportunities, or trends..."
-              className="flex-1"
+              placeholder="Ask about industry data..."
+              className="flex-1 rounded-full border-stone-200 bg-stone-50 px-5 focus-visible:ring-rose-300"
               disabled={loading}
             />
-            <Button type="submit" disabled={loading || !input.trim()} size="icon">
+            <Button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="rounded-full bg-gradient-to-r from-rose-500 to-orange-400 hover:from-rose-600 hover:to-orange-500 shadow-sm h-10 w-10 p-0"
+              size="icon"
+            >
               <Send className="h-4 w-4" />
             </Button>
           </form>
-          <p className="mt-2 text-xs text-muted-foreground text-center">
+          <p className="mt-2 text-[11px] text-stone-400 text-center">
             Powered by DeepSeek + real BLS/FRED data
           </p>
         </div>
