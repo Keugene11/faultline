@@ -8,10 +8,11 @@ import {
   Activity,
   ArrowRight,
   BarChart3,
-  Search,
   Sparkles,
   Users,
   DollarSign,
+  Cpu,
+  Target,
 } from "lucide-react";
 
 function TrendIcon({ trend }: { trend: string }) {
@@ -31,12 +32,6 @@ function categoryStyle(cat: string) {
     structural: "bg-violet-50 text-violet-700 border-violet-200",
   };
   return map[cat] || "bg-stone-50 text-stone-700 border-stone-200";
-}
-
-function employmentColor(change: string) {
-  if (change.startsWith("-")) return "text-rose-600";
-  if (change.startsWith("+0.0")) return "text-amber-600";
-  return "text-emerald-600";
 }
 
 export default function Home() {
@@ -75,6 +70,10 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-orange-50/50 to-amber-50/30" />
         <div className="relative mx-auto max-w-6xl px-6 py-20">
           <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 border border-stone-200/60 px-4 py-1.5 text-sm text-stone-600 mb-6 shadow-sm">
+              <Target className="h-3.5 w-3.5 text-rose-500" />
+              Startup-sized industries you can actually tackle
+            </div>
             <h1 className="text-5xl font-bold tracking-tight text-stone-900 leading-[1.1]">
               Find the cracks
               <br />
@@ -83,14 +82,14 @@ export default function Home() {
               </span>
             </h1>
             <p className="mt-5 text-lg text-stone-500 leading-relaxed">
-              Real government statistics that reveal industry inefficiencies and startup
-              opportunities. Every number cited. Every trend tracked.
+              Real BLS and FRED statistics for fragmented, low-tech industries where a
+              startup can win. Every number is cited. Every opportunity is grounded in data.
             </p>
           </div>
-          <div className="mt-10 flex gap-8">
+          <div className="mt-10 flex flex-wrap gap-8">
             {[
               { icon: BarChart3, value: `${industries.length}`, label: "Industries" },
-              { icon: Search, value: `${totalInsights}`, label: "Fault Lines" },
+              { icon: Sparkles, value: `${totalInsights}`, label: "Fault Lines" },
               { icon: DollarSign, value: "100%", label: "Cited" },
             ].map(({ icon: Icon, value, label }) => (
               <div key={label} className="flex items-center gap-3">
@@ -117,16 +116,22 @@ export default function Home() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-stone-900">Top Fault Lines</h2>
-            <p className="text-sm text-stone-400">Highest-confidence pain points across all industries</p>
+            <p className="text-sm text-stone-400">
+              Highest-confidence pain points — sorted by data quality
+            </p>
           </div>
         </div>
         <div className="grid gap-3">
           {industries
             .flatMap((ind) =>
-              ind.insights.map((ins) => ({ ...ins, industryName: ind.name, industryId: ind.id }))
+              ind.insights.map((ins) => ({
+                ...ins,
+                industryName: ind.name,
+                industryId: ind.id,
+              }))
             )
             .sort((a, b) => b.confidence - a.confidence)
-            .slice(0, 5)
+            .slice(0, 6)
             .map((insight) => (
               <Link key={insight.id} href={`/industry/${insight.industryId}`}>
                 <Card className="group border-stone-200/60 shadow-sm hover:shadow-md hover:border-rose-200 transition-all duration-200 cursor-pointer bg-white">
@@ -177,8 +182,10 @@ export default function Home() {
             <Users className="h-4 w-4 text-violet-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-stone-900">Browse Industries</h2>
-            <p className="text-sm text-stone-400">Explore fault lines by sector</p>
+            <h2 className="text-xl font-bold text-stone-900">Startup-Ready Industries</h2>
+            <p className="text-sm text-stone-400">
+              Fragmented markets with low tech adoption — where you can actually win
+            </p>
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -194,33 +201,49 @@ export default function Home() {
                       <ArrowRight className="h-3.5 w-3.5 text-stone-400" />
                     </div>
                   </div>
-                  <p className="text-xs text-stone-400">NAICS {industry.naicsCode}</p>
+                  <p className="text-xs text-stone-400 mt-0.5">{industry.description}</p>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="rounded-xl bg-stone-50 p-2.5 text-center">
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="rounded-xl bg-stone-50 p-2.5">
                       <div className="text-sm font-bold text-stone-900">{industry.marketSize}</div>
                       <div className="text-[10px] text-stone-400 font-medium uppercase tracking-wider mt-0.5">
                         Market
                       </div>
                     </div>
-                    <div className="rounded-xl bg-stone-50 p-2.5 text-center">
+                    <div className="rounded-xl bg-stone-50 p-2.5">
                       <div className="text-sm font-bold text-stone-900">
-                        {(industry.employmentK / 1000).toFixed(1)}M
+                        {industry.fragmentation.split(",")[0]}
                       </div>
                       <div className="text-[10px] text-stone-400 font-medium uppercase tracking-wider mt-0.5">
-                        Workers
-                      </div>
-                    </div>
-                    <div className="rounded-xl bg-stone-50 p-2.5 text-center">
-                      <div className={`text-sm font-bold ${employmentColor(industry.employmentChange)}`}>
-                        {industry.employmentChange}
-                      </div>
-                      <div className="text-[10px] text-stone-400 font-medium uppercase tracking-wider mt-0.5">
-                        Growth
+                        Businesses
                       </div>
                     </div>
                   </div>
+
+                  {/* Tech penetration bar */}
+                  <div className="rounded-xl bg-orange-50 p-2.5 mb-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <Cpu className="h-3 w-3 text-orange-500" />
+                        <span className="text-[10px] font-semibold text-orange-700 uppercase tracking-wider">
+                          Tech Adoption
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-orange-600">
+                        {industry.techPenetration}
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-orange-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-orange-400 to-rose-400"
+                        style={{
+                          width: `${parseInt(industry.techPenetration.replace(/[^0-9]/g, "")) || 5}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex items-center gap-2 rounded-xl bg-rose-50 px-3 py-2">
                     <Sparkles className="h-3.5 w-3.5 text-rose-500" />
                     <span className="text-xs font-semibold text-rose-700">
@@ -237,7 +260,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-stone-200/60 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-8 text-center text-sm text-stone-400">
-          Data sourced from BLS, FRED, Census Bureau, and SEC EDGAR. All statistics are cited.
+          Data sourced from BLS, FRED, and Census Bureau. All statistics are cited with original sources.
         </div>
       </footer>
     </div>
